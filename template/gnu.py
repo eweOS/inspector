@@ -4,6 +4,7 @@ import requests
 import re
 from datetime import datetime
 
+enabled = True
 
 def get(
     name: str = "",
@@ -44,8 +45,8 @@ def get(
                 min_ver = file_regex.findall(filename)[0]
                 if type(min_ver) is tuple:
                     min_ver = min_ver[0]
-    return min_ver.replace('-','_')
+    return {"version": min_ver.replace("-", "_")}
 
 
 if __name__ == "__main__":
-    print(get(name="readline",included="beta"))
+    print(get(name="bison"))
