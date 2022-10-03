@@ -1,10 +1,10 @@
 from __future__ import annotations
 from bs4 import BeautifulSoup
 import requests
-import re
-from datetime import datetime
+from .tool.iter_flist import Flist
 
 enabled = True
+
 
 def get(
     name: str = "",
@@ -22,29 +22,21 @@ def get(
     except:
         includes_regex = ""
 
-    file_regex = re.compile(
-        f"{name}-({version_regex}{includes_regex}){extension_regex}"
+    flist = Flist(
+        f"{name}-({version_regex}{includes_regex}){extension_regex}",
+        r"%Y-%m-%d %H:%M",
     )
-
-    min_time = datetime.min
-    min_ver = ""
 
     content = requests.get(url).text
     soup = BeautifulSoup(content, "html.parser")
     for tr in soup.body.table.find_all("tr"):
-        time_obj = min_time
-        filename = ""
         for td in tr.find_all("td"):
             a = td.find("a")
+            filename = ""
             if a is not None:
                 filename = a["href"]
-            if re.match(r"[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}", td.text):
-                time = td.text.strip()
-                time_obj = datetime.strptime(time, r"%Y-%m-%d %H:%M")
-            if time_obj >= min_time and file_regex.match(filename):
-                min_ver = file_regex.findall(filename)[0]
-                if type(min_ver) is tuple:
-                    min_ver = min_ver[0]
+            flist.update(filename, td.text)
+    min_ver = flist.read()
     return {"version": min_ver.replace("-", "_")}
 
 
