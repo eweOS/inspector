@@ -6,7 +6,7 @@ enabled = True
 
 def get(repo: str = "", type: str = "release", flags: list[str] = []) -> dict[str, str]:
     api_url = f"https://api.github.com/repos/{repo}"
-    if type == "tags":
+    if type == "tag":
         tags = requests.get(f"{api_url}/tags").json()
         version = tags[0]["name"].lstrip("v")
     elif type == "release":
